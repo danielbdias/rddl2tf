@@ -34,6 +34,8 @@ class TestDefaultCompiler(unittest.TestCase):
     def setUp(self):
         self.batch_size = 32
 
+        tf.compat.v1.disable_eager_execution()
+
         self.rddl1 = rddlgym.make('Reservoir-8', mode=rddlgym.AST)
         self.compiler1 = DefaultCompiler(self.rddl1, self.batch_size)
         self.compiler1.init()

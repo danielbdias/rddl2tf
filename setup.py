@@ -41,10 +41,11 @@ setup(
     scripts=['scripts/rddl2tf'],
     python_requires='>=3.6',
     install_requires=[
-        'tensorflow<2.0.0',
-        'typing',
-        'pyrddl',
-        'rddlgym'
+        'numpy==1.22.3',
+        'tensorflow==2.8.0',
+        'tensorboard==2.8.0',
+        'typing==3.7.4',
+        'pyrddl==0.1.10'
     ],
     include_package_data=True,
     zip_safe=False,

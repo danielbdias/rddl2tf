@@ -26,7 +26,8 @@ class TestTensorFluent(unittest.TestCase):
 
     def setUp(self):
         self.batch_size = 32
-        tf.reset_default_graph()
+        tf.compat.v1.disable_eager_execution()
+        tf.compat.v1.reset_default_graph()
         self.zero = TensorFluent.constant(0.0)
         self.one = TensorFluent.constant(1)
 
@@ -40,7 +41,7 @@ class TestTensorFluent(unittest.TestCase):
         mean = self.zero
         variance = self.one
         dist, fluent = TensorFluent.Normal(mean, variance, self.batch_size)
-        self.assertIsInstance(dist, tf.distributions.Normal)
+        self.assertIsInstance(dist, tf.compat.v1.distributions.Normal)
         self._test_op_name(fluent, r'^Normal[^/]*/sample')
         self._test_fluent(fluent, tf.float32, [self.batch_size], [], True)
 
@@ -49,11 +50,11 @@ class TestTensorFluent(unittest.TestCase):
         #     (u * u) * 0.01
         # else
         #     0.0
-        x = tf.random_normal([self.batch_size, 1])
+        x = tf.compat.v1.random_normal([self.batch_size, 1])
         x = TensorFluent(x, scope=[], batch=True)
-        gx = tf.random_normal([])
+        gx = tf.compat.v1.random_normal([])
         gx = TensorFluent(gx, scope=[], batch=False)
-        u = tf.random_normal([self.batch_size,])
+        u = tf.compat.v1.random_normal([self.batch_size,])
         u = TensorFluent(u, scope=[], batch=True)
         c0 = TensorFluent.constant(0.01)
         cond = TensorFluent.abs(x - gx) > self.zero
@@ -112,11 +113,11 @@ class TestTensorFluent(unittest.TestCase):
         r_size = 8
         low_penalty = TensorFluent.constant(-5.0)
         high_penalty = TensorFluent.constant(-10.0)
-        lower_bound = tf.random_normal([r_size], mean=50.0, stddev=10.0)
+        lower_bound = tf.compat.v1.random_normal([r_size], mean=50.0, stddev=10.0)
         lower_bound = TensorFluent(lower_bound, scope=['?r'], batch=False)
-        upper_bound = tf.random_normal([r_size], mean=200.0, stddev=10.0)
+        upper_bound = tf.compat.v1.random_normal([r_size], mean=200.0, stddev=10.0)
         upper_bound = TensorFluent(upper_bound, scope=['?r'], batch=False)
-        rlevel = tf.random_normal([self.batch_size, r_size], mean=100.0, stddev=10.0)
+        rlevel = tf.compat.v1.random_normal([self.batch_size, r_size], mean=100.0, stddev=10.0)
         rlevel = TensorFluent(rlevel, scope=['?r'], batch=True)
         cond = (rlevel <= lower_bound)
         true_case = low_penalty * (lower_bound - rlevel)
@@ -147,10 +148,10 @@ class TestTensorFluent(unittest.TestCase):
         # else
         #     Bernoulli(NOISE-PROB(?x,?y));
         x_size, y_size = 3, 3
-        alive = tf.distributions.Bernoulli(probs=0.7, dtype=tf.bool).\
+        alive = tf.compat.v1.distributions.Bernoulli(probs=0.7, dtype=tf.bool).\
             sample([self.batch_size, x_size, y_size])
         alive = TensorFluent(alive, scope=['?x', '?y'], batch=True)
-        noise_prob = tf.random_uniform([x_size, y_size], dtype=tf.float32)
+        noise_prob = tf.compat.v1.random_uniform([x_size, y_size], dtype=tf.float32)
         noise_prob = TensorFluent(noise_prob, scope=['?x', '?y'], batch=False)
         cond = alive
         true_case = TensorFluent.Bernoulli(self.one - noise_prob, batch_size=self.batch_size)[1]
@@ -163,7 +164,7 @@ class TestTensorFluent(unittest.TestCase):
         # else
         #     ~running(?x);
         x_size = 128
-        mean = tf.random_uniform([x_size], dtype=tf.float32)
+        mean = tf.compat.v1.random_uniform([x_size], dtype=tf.float32)
         mean = TensorFluent(mean, scope=['?x'])
         running = TensorFluent.Bernoulli(mean, batch_size=self.batch_size)[1]
         reboot = TensorFluent.Bernoulli(self.one - mean, batch_size=self.batch_size)[1]
@@ -200,7 +201,7 @@ class TestTensorFluent(unittest.TestCase):
         self.assertIsInstance(grad_before, tf.Tensor)
         self.assertIsNone(grad_after)
 
-        with tf.Session() as sess:
+        with tf.compat.v1.Session() as sess:
             f1, f2 = sess.run([sample.tensor, fluent.tensor])
             self.assertListEqual(list(f1), list(f2))
 
@@ -212,7 +213,7 @@ class TestTensorFluent(unittest.TestCase):
         variance = TensorFluent(tf.ones([self.batch_size]), [], True)
         _, sample = TensorFluent.Normal(mean, variance)
 
-        stop_batch = tf.cast(tf.distributions.Bernoulli(probs=0.5).sample(self.batch_size), tf.bool)
+        stop_batch = tf.cast(tf.compat.v1.distributions.Bernoulli(probs=0.5).sample(self.batch_size), tf.bool)
 
         fluent = TensorFluent.stop_batch_gradient(sample, stop_batch)
         self._test_fluent(fluent, sample.dtype, sample.shape.as_list(), sample.scope.as_list(), sample.batch)
@@ -224,7 +225,7 @@ class TestTensorFluent(unittest.TestCase):
         self.assertIsInstance(grad_before, tf.Tensor)
         self.assertIsInstance(grad_after, tf.Tensor)
 
-        with tf.Session() as sess:
+        with tf.compat.v1.Session() as sess:
             f1, f2 = sess.run([sample.tensor, fluent.tensor])
             self.assertListEqual(list(f1), list(f2))
 

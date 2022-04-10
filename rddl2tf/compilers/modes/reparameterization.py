@@ -30,7 +30,7 @@ from typing import Dict, List, Optional, Tuple
 CPFPair = Tuple[str, TensorFluent]
 ShapeAsList = List[int]
 ShapeScope = Dict[str, TensorFluentShape]
-Noise = Tuple[tf.distributions.Distribution, ShapeAsList]
+Noise = Tuple[tf.compat.v1.distributions.Distribution, ShapeAsList]
 NoiseList = List[Noise]
 NoiseMap = List[Tuple[str, NoiseList]]
 
@@ -230,12 +230,12 @@ class ReparameterizationCompiler(DefaultCompiler):
                 mean_shape = self._get_reparameterization(args[0], scope, noise)
                 var_shape = self._get_reparameterization(args[1], scope, noise)
                 shape = ReparameterizationCompiler._broadcast(mean_shape, var_shape)
-                dist = tf.distributions.Normal(loc=0.0, scale=1.0)
+                dist = tf.compat.v1.distributions.Normal(loc=0.0, scale=1.0)
                 noise.append((dist, shape.as_list()))
                 return shape
             elif etype[1] == "Exponential":
                 rate_shape = self._get_reparameterization(args[0], scope, noise)
-                dist = tf.distributions.Uniform(low=0.0, high=1.0)
+                dist = tf.compat.v1.distributions.Uniform(low=0.0, high=1.0)
                 noise.append((dist, rate_shape.as_list()))
                 return rate_shape
             elif etype[1] == "Gamma":
@@ -254,7 +254,7 @@ class ReparameterizationCompiler(DefaultCompiler):
                     scale_fluent = self._compile_expression(args[1], scope, noise=None)
                     concentration = shape_fluent.tensor
                     rate = 1 / scale_fluent.tensor
-                    dist = tf.distributions.Gamma(concentration, rate)
+                    dist = tf.compat.v1.distributions.Gamma(concentration, rate)
 
                 noise.append((dist, shape))
 
@@ -264,7 +264,7 @@ class ReparameterizationCompiler(DefaultCompiler):
                 low_shape = self._get_reparameterization(args[0], scope, noise)
                 high_shape = self._get_reparameterization(args[1], scope, noise)
                 shape = ReparameterizationCompiler._broadcast(low_shape, high_shape)
-                dist = tf.distributions.Uniform(low=0.0, high=1.0)
+                dist = tf.compat.v1.distributions.Uniform(low=0.0, high=1.0)
                 noise.append((dist, shape.as_list()))
                 return shape
         elif etype[0] in ["arithmetic", "boolean", "relational"]:
