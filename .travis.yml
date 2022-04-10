@@ -1,7 +1,0 @@
-language: python
-python:
-  - "3.6"
-install:
-  - pip install -U rddl2tf
-script:
-  - python3 -m unittest -v tests/*.py

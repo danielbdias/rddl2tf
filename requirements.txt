@@ -3,4 +3,3 @@ tensorflow==2.8.0
 tensorboard==2.8.0
 typing==3.7.4
 pyrddl==0.1.10
-#rddlgym for tests
